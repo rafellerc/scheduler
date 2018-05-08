@@ -69,7 +69,7 @@ def test_gender(n_p, n_d, n_s, sol, gender, demand, prop):
             inst_fail.append(s)
 
     # Question: Return or not the fail instances?
-    return passed
+    return passed, inst_fail
 
 def test_demand(n_p, n_d, n_s, sol, demand):
     """Tests a solution to check if the demand of people is met.
@@ -265,9 +265,45 @@ def test_slot_choice(n_p, n_d, n_s, sol, slot_choice):
     # Question: Return or not the fail instances?
     return passed, inst_fail
 
+def test_force(n_p, n_d, n_s, sol, force):
+    """Tests a solution to check if all the pre-allocated people are in
+    correctly allocated in the solution 
+
+    Args:
+        n_p: [int] Number of people in the list
+        n_d: [int] Number of days in final solution
+        n_s: [int] Number of slots in each day
+        sol: [ndarray] The solution to the optimization problem, normally a 
+        2D matrix of zeros and ones in which each row corresponds to a 
+        person and each row to a slot.
+        force: [list] List of tuples (person, day*n_s + slot) which mean 
+        that we are forcing person to be on slot on the given day.
+
+    Returns:
+        bool: True if the solution respects the preallocation
+        False otherwise.
+        inst_fail: A list of instances on which the test failed
+                The instances are organized as (person, day*n_s + slot)
+
+    """
+    assert isinstance(sol, np.ndarray), "The given solution is not a numpy array."
+    assert sol.shape == (n_p, n_d*n_s), ("The informed dimensions are not" +
+        "consistent with the given solution. Informed dimensions were, " +
+        "n_p: {}, n_d: {}, n_s: {}".format(n_p,n_d,n_s))
+    passed = True
+    inst_fail = []
+
+    for p, s in force:
+        if sol[p, s] != 1:
+            passed = False
+            inst_fail.append((p,s))
+
+    return passed, inst_fail
+
 
 
 if __name__ == "__main__":
+    pass
     # Test indisp.
     # sol_ = np.random.choice([0, 1], size=([2,9]), p=[0.7, 0.3])
     # print("Solution: \n", sol_, "\n")
@@ -332,3 +368,14 @@ if __name__ == "__main__":
     # print(slot_choice_)
     # print(passed_, fail)
 
+    # Test Force
+    # sol_ = np.random.choice([0, 1], size=([4,4]), p=[0.3, 0.7])
+    # force_ = []
+    # for k in range(2):
+    #     p_ = randint(0,3)
+    #     s_ = randint(0,3)
+    #     force_.append((p_,s_))
+    # passed_, fail = test_force(4, 2, 2, sol_, force_)
+    # print(sol_)
+    # print(force_)
+    # print(passed_, fail)
