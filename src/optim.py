@@ -41,9 +41,14 @@ def solve(n_p, n_d, n_s, G, T, M, indisp, forced, slot_choice, demand, prop=0.5,
 
     X = cvx.Bool(n_p,n_d*n_s)
 
-    demand_constr = []
-    for s in range(n_d*n_s):
-        demand_constr.append(cvx.sum_entries(X[:, s]) == demand[s])
+    if demand is not None:
+        print('demand is not None, but is: ', demand)
+        demand_constr = []
+        for s in range(n_d*n_s):
+            demand_constr.append(cvx.sum_entries(X[:, s]) == demand[s])
+    # This is just an example, I need to change the rest of the code to use it
+    else:
+        demand_constr = [1 > 0]
 
     # Date Indisponibility constraints
     ind_constr = []
@@ -112,13 +117,13 @@ def solve(n_p, n_d, n_s, G, T, M, indisp, forced, slot_choice, demand, prop=0.5,
 
 if __name__ == "__main__":
     n_p_ = 64
-    n_d_ = 2
+    n_d_ = 4
     n_s_ = 6
-    demand_ = np.asarray([4, 3, 1, 2, 3, 1, 4, 3, 1, 2, 3, 1], dtype=np.int8)
+    demand_ = np.asarray([4, 3, 1, 2, 3, 1, 4, 3, 1, 2, 3, 1, 4, 3, 1, 2, 3, 1, 4, 3, 1, 2, 3, 1], dtype=np.int8)
     indisp_ = []
     for k in range(4):
         p_ = randint(0, n_p_-1)
-        d_ = randint(0, n_d_-1)
+        d_ = randint(0, n_d_-1) 
         indisp_.append((p_,d_))
     force_ = []
     for k in range(3):
@@ -139,7 +144,7 @@ if __name__ == "__main__":
 
 
     status, sol_, max_workload = solve(n_p_, n_d_, n_s_,
-                                G_, T_, M_, indisp_, force_, slot_choice_, demand_, prop)
+                                G_, T_, M_, indisp_, force_, slot_choice_, demand_, prop=prop)
 
     print("Status: ", status, "| Max workload: ", max_workload)
     print("Solution: \n", sol_)
