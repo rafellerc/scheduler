@@ -13,12 +13,12 @@ def solve(n_p, n_d, n_s, G, T, M, indisp, forced, slot_choice, demand, prop=0.5,
         n_d (int): the number of days being considered
         n_s (int): the number of slots of work per day
         G (ndarray): A np array (colum vector) of 1s and 0s representing
-        the gender of each person in the list, 1 for man and 0 for woman 
+        the gender of each person in the list, 1 for man and 0 for woman
         T (ndarray): A np array (colum vector) representing the teacher
-        status of each person in the list, 1 for teacher and 0 for auxiliar 
+        status of each person in the list, 1 for teacher and 0 for auxiliar
         M (ndarray): A np array (colum vector) representing the maturity
-        status of each person in the list, 1 for mature and 0 otherwise 
-        indisp (list): List of tuples corresponding to the the date 
+        status of each person in the list, 1 for mature and 0 otherwise
+        indisp (list): List of tuples corresponding to the the date
         indisponibilities in the form (person, day)
         forced (list): Similarly to indisp, this list contains the tuples
         of people that we want to force to be present in a given slot in the
@@ -39,13 +39,14 @@ def solve(n_p, n_d, n_s, G, T, M, indisp, forced, slot_choice, demand, prop=0.5,
     # To fix someone on a specific role you can set the other slots to 0
     # every day.
 
-    X = cvx.Bool(n_p,n_d*n_s)
+    X = cvx.Bool(n_p, n_d*n_s)
 
     if demand is not None:
-        print('demand is not None, but is: ', demand)
+        # print('demand is not None, but is: ', demand)
         demand_constr = []
         for s in range(n_d*n_s):
             demand_constr.append(cvx.sum_entries(X[:, s]) == demand[s])
+
     # This is just an example, I need to change the rest of the code to use it
     else:
         demand_constr = [1 > 0]
@@ -84,22 +85,22 @@ def solve(n_p, n_d, n_s, G, T, M, indisp, forced, slot_choice, demand, prop=0.5,
     slot_constr = []
     for p in range(n_p):
         for s in range(n_s):
-            slot_constr = slot_constr + [X[p, s + n_s_*d] <= slot_choice[p, s] for d in range(n_d_)]
+            slot_constr = slot_constr + [X[p, s + n_s*d] <= slot_choice[p, s] for d in range(n_d)]
 
     # Forced constraint
     force_constr = []
     for p, d in forced:
         force_constr.append(X[p,d] == 1)
 
-    constraints = (demand_constr 
-                  + ind_constr
-                  + gend_constr 
-                  + teach_constr
-                  + matur_constr
-                  + no_rep_constr
-                  + slot_constr
-                  + force_constr
-                  )
+    constraints = (demand_constr
+                   + ind_constr
+                   + gend_constr
+                   + teach_constr
+                   + matur_constr
+                   + no_rep_constr
+                   + slot_constr
+                   + force_constr
+                   )
 
     # Objective Function
     obj = cvx.Minimize(cvx.max_entries(cvx.sum_entries(X, axis=1)))
@@ -204,7 +205,7 @@ if __name__ == "__main__":
 
         # Forced choice Test
         force_test, force_fail = tt.test_force(n_p_,n_d_,n_s_, sol_, force_)
-        if slot_test and status=='optimal':
+        if slot_test and status == 'optimal':
             print('Forced test SUCCESS.')
         else:
             print('Forced test FAILED. Failed instances: ', slot_fail)
